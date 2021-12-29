@@ -5,130 +5,36 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Tiler Webscript</title>
+    <link rel="stylesheet" href="css/image-tiler/main.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <style>
-        * {
-            margin: 0 auto;
-            padding: 0;
-        }
-
-        html {
-            background-color: #141617;
-            width: 210mm;
-            height: 297mm;
-        }
-
-        img {
-            margin-right: 0.5mm;
-            margin-left: 0.5mm;
-            page-break-inside: avoid;
-        }
-
-        /* padding on top of the pages */
-        .row:first-of-type, .last-row + .row {
-            padding-top: 1.5mm;
-        }
-
-        .last-row {
-            page-break-after: always;
-        }
-
-        body {
-            display: block;
-            text-align: center;
-        }
-
-        /* not shown when printing */
-        @media screen {
-            body {
-                outline: 1.5mm solid aqua;
-            }
-
-            .last-row {
-                /* an outline only on bottom */
-                box-shadow: 0 1mm 0 aqua;
-            }
-        }
-    </style>
 </head>
 <body>
-    <!-- TODO: add controls or help maybe? but hide them using css when printing!
-               also try hiding everything unless printing, so print to preview?-->
-    <script>
-        function getBlobURL(image) {
-            var urlCreator = window.URL || window.webkitURL;
-            return urlCreator.createObjectURL(image);
-        }
+    <div class="wrapper">
+        <button onclick="window.print();">Print</button>
+        <select id="page-size-select" name="page-size" onchange="pageSizeSelect(this.value);">
+            <option value="0,0" disabled>Custom</option>
+            <optgroup label="Common Units">
+                <option value="420,594">A2</option>
+                <option value="297,420">A3</option>
+                <option value="210,297" selected>A4</option>
+                <option value="148,210">A5</option>
+                <option value="105,148">A6</option>
+            </optgroup>
 
-        function createNewRow() {
-            var row = document.createElement('div');
-            row.classList.add('row');
-            $('body').append(row);
+            <optgroup label="Freedom Units">
+                <option value="215.9,279.4">Letter</option>
+            </optgroup>
+        </select>
+        <button onclick="orientationButton();">Portrait / Landscape</button>
+        <button onclick="pageSizeSelect('0,0');">Page size</button>
+        <button onclick="imageSizeSelect();">Image size</button>
 
-            return row;
-        }
+        <p id="image-counter-label" style="float: right;">No images added</p>
+    </div>
 
-        $(document).ready(function () {
-            // TODO: ask for paremeters of body and image by get params or dialogs
-            // NOTE: all dimensions are in millimeters
-            const margin = {
-                x: 1,
-                y: 1,
-            }
+    <!-- wrapper contains the rows (only shown when printing) -->
+    <div class="printed"/>
 
-            const pageSize = {
-                width: 210,
-                height: 297,
-            };
-
-            const imageSize = {
-                width: 40,
-                height: 55,
-            };
-
-            // how many times can the image fit in this page
-            const fit = {
-                x: Math.trunc(pageSize.width / (imageSize.width + margin.x)),
-                y: Math.trunc(pageSize.height / (imageSize.height + margin.y)),
-            };
-
-            var row = createNewRow();
-            var rowCount = 1;
-
-            // without this the browser just opens all files as tabs
-            $("html").on("dragover", function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-            });
-
-            $('html').on('drop', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-
-                console.log(row);
-
-                var files = e.originalEvent.dataTransfer.files;
-                for (var i = 0; i < files.length; i++) {
-                    img = document.createElement('img');
-                    img.src = getBlobURL(files[i]);
-                    img.style.width = imageSize.width + 'mm';
-                    img.style.height = imageSize.height + 'mm';
-
-                    // using children to check if the row is full
-                    if (row.children.length >= fit.x) {
-                        // add class for styling to the last row
-                        if (rowCount >= fit.y) {
-                            row.classList.add('last-row');
-                            rowCount = 0;
-                        }
-                        row = createNewRow();
-                        rowCount++;
-                    }
-
-                    row.appendChild(img);
-                }
-            });
-        });
-    </script>
+    <script src="js/image-tiler/main.js"/>
 </body>
 </html>

@@ -1,0 +1,6 @@
+/* hide stuff that is being printed */
+.printed {
+    display: none;
+}
+
+
